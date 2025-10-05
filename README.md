@@ -46,6 +46,7 @@ Prints detected transitions in the format:
 
 ```bash
 Detected Transitions:
+STATE_DISARMED -> STATE_ARMING [arm_button_pressed()]
 STATE_ARMING -> STATE_ARMING [active block]
 STATE_ARMING -> STATE_DISARMED [cancel_button_pressed()]
 STATE_ARMING -> STATE_ARMED [(current_time() - arming_timer) > 10]
@@ -59,6 +60,7 @@ STATE_ALERT -> STATE_ALERT [active block]
 STATE_ALERT -> STATE_RESETTING [alert_acknowledged()]
 STATE_RESETTING -> STATE_RESETTING [active block]
 STATE_RESETTING -> STATE_DISARMED [reset_complete()]
+
 ```
 
 Opens a visual graph window showing:
