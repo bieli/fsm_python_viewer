@@ -34,18 +34,17 @@ def visualize_fsm(G):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(
-            "Usage: python fsm_extractor.py <target_python_file.py> [state_variable_name (default: state)]"
-        )
-        return
+    import argparse
 
-    filename = sys.argv[1]
-    state_var = sys.argv[2] if 2 in sys.argv else "state"
-    with open(filename, "r") as f:
+    parser = argparse.ArgumentParser(description="Extract FSM from Python code")
+    parser.add_argument("filename", help="Target Python file")
+    parser.add_argument("state_var", nargs="?", default="state", help="State variable name")
+    args = parser.parse_args()
+
+    with open(args.filename, "r") as f:
         tree = ast.parse(f.read())
 
-    extractor = FSMExtractor(state_var=state_var)
+    extractor = FSMExtractor(state_var=args.state_var)
     extractor.visit(tree)
 
     print("Detected Transitions:")
