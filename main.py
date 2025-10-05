@@ -160,7 +160,7 @@ def build_fsm_graph(transitions):
 
 
 def visualize_fsm(G):
-    pos = nx.spring_layout(G, seed=42)
+    pos = nx.circular_layout(G)
     plt.figure(figsize=(12, 8))
     plt.title("FSM with Conditions and Triggers")
 
@@ -176,7 +176,6 @@ def visualize_fsm(G):
         arrows=True,
     )
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color="darkred")
-
     plt.show()
 
 
