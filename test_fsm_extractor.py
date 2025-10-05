@@ -47,7 +47,7 @@ if state in (STATE_A, STATE_B):
         self.assertIn(("A", "C", "trigger_condition()"), transitions)
         self.assertIn(("B", "C", "trigger_condition()"), transitions)
 
-    def test_trigger_extraction(self):
+    def test_trigger_extraction_nested_ifs(self):
         code = """
 state == "IDLE"
 
@@ -60,3 +60,16 @@ if state == "IDLE":
         transitions = self.extractor.transitions
         self.assertIn(("IDLE", "IDLE", "active block"), transitions)
         self.assertIn(("IDLE", "OVERHEAT", "temperature > 100"), transitions)
+
+    def test_trigger_extraction_one_line_if(self):
+        code = """
+state == "IDLE"
+
+if state == "IDLE" and temperature > 100:
+    state = "OVERHEAT"
+"""
+        tree = ast.parse(code)
+        self.extractor.visit(tree)
+        transitions = self.extractor.transitions
+        self.assertIn(("IDLE", "OVERHEAT", "temperature > 100"), transitions)
+

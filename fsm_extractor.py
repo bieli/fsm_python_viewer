@@ -43,6 +43,14 @@ class FSMExtractor(ast.NodeVisitor):
             for stmt in node.orelse:
                 self.visit(stmt)
             self.current_state_context = None
+        elif src_states:
+              # simple short state block with one condition
+              self.current_state_context = (src_states, trigger)
+              for stmt in node.body:
+                  self.visit(stmt)
+              for stmt in node.orelse:
+                  self.visit(stmt)
+              self.current_state_context = None
         else:
             # Nested condition inside a known state block
             if self.current_state_context:
@@ -60,33 +68,38 @@ class FSMExtractor(ast.NodeVisitor):
                     self.visit(stmt)
 
     def _extract_fsm_condition(self, test):
-        src_states = []
-        trigger = None
+        state_context = []
+        triggers = []
+
+        def extract(expr):
+            s, t = self._extract_fsm_condition(expr)
+            if s:
+                state_context.extend(s if isinstance(s, list) else [s])
+            if t:
+                triggers.append(t)
 
         if isinstance(test, ast.BoolOp) and isinstance(test.op, ast.And):
             for expr in test.values:
-                s, t = self._extract_fsm_condition(expr)
-                if isinstance(s, list):
-                    src_states.extend(s)
-                elif s:
-                    src_states.append(s)
-                if t:
-                    trigger = t
+                extract(expr)
 
         elif isinstance(test, ast.Compare):
             if isinstance(test.left, ast.Name) and test.left.id == self.state_var:
                 comparator = test.comparators[0]
                 if isinstance(comparator, ast.Tuple):
-                    src_states = [self._resolve_value(elt) for elt in comparator.elts]
+                    state_context = [self._resolve_value(e) for e in comparator.elts]
                 else:
-                    src_states = [self._resolve_value(comparator)]
+                    state_context = [self._resolve_value(comparator)]
             else:
-                trigger = self._extract_compare_repr(test)
+                triggers.append(self._extract_compare_repr(test))
 
         elif isinstance(test, ast.Call):
-            trigger = self._extract_call_repr(test)
+            triggers.append(self._extract_call_repr(test))
 
-        return src_states if src_states else None, trigger
+        elif isinstance(test, ast.Name):
+            triggers.append(test.id)
+
+        return state_context if state_context else None, " and ".join(triggers) if triggers else None
+
 
     def _extract_call_repr(self, call):
         if isinstance(call.func, ast.Name):
