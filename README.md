@@ -1,5 +1,8 @@
 # Python FSM Extractor & Visualizer
 
+![CI status](https://github.com/bieli/fsm_python_viewer/actions/workflows/CI.yml/badge.svg)
+![github_tag](https://img.shields.io/github/v/tag/bieli/fsm_python_viewer)
+
 The goal of this project is support debugging of Open Source projects written in Python
 with creazy FSMs as visual graph representation tool.
 
